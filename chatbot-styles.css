@@ -1,0 +1,34 @@
+/*
+Styles for chatbot
+*/
+
+#chatBotBox{
+    border:2px solid slategray;
+    background-color:bisque;
+    position:fixed;
+    bottom: -1rem;
+    right: 25px;
+    height: auto;
+    width: 33%;
+}
+
+#chatBotTab{
+    border: 1px solid linen;
+}
+
+#chatBotMessageBox{
+    height: 10rem;
+    overflow-y:scroll;
+    overflow-x:auto;
+}
+
+#chatBotInputBox{
+    text-align:center;
+}
+#chatBotInput{
+    width:77%;
+}
+#chatBotButton{
+    width:auto;
+    height:fit-content;
+}
