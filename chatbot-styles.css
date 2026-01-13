@@ -2,33 +2,59 @@
 Styles for chatbot
 */
 
-#chatBotBox{
+.chatBotBox{
     border:2px solid slategray;
     background-color:bisque;
     position:fixed;
-    bottom: -1rem;
+    bottom: -150px;
     right: 25px;
     height: auto;
     width: 33%;
+    transition:all 1s ease-in-out;
+    
 }
 
-#chatBotTab{
+.chatBotTab{
     border: 1px solid linen;
 }
 
-#chatBotMessageBox{
+.chatBotMessageBox{
     height: 10rem;
     overflow-y:scroll;
     overflow-x:auto;
 }
 
-#chatBotInputBox{
+.chatBotInputBox{
     text-align:center;
 }
-#chatBotInput{
+.chatBotInput{
     width:77%;
 }
-#chatBotButton{
+.chatBotButton{
     width:auto;
-    height:fit-content;
 }
+
+.openChatBox{
+   /* animation-name: movechat;
+    animation-direction: alternate;
+    animation-duration: 2s;
+    animation-iteration-count: 1;
+    animation-play-state: running;
+    animation;*/
+    bottom: 30px;
+    /*transition: all 2s ease-in;*/
+}
+
+
+
+/*@keyframes movechat { 
+    0%{
+        bottom: 10px;
+    }
+    100%{
+        bottom:70px
+    }
+}*/
+
+
+
