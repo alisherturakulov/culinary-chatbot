@@ -4,13 +4,14 @@
         <meta charset="utf-8">
         <meta name = "viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="./chatbot-styles.css">
-        <script src="chatbot-script.js" defer></script>
     </head>
     <body>
         <div class="chatBotBox">
-            <input type="checkbox" class="chatBotTab" name="chatBotTab">
+            <!--<input type="checkbox" class="chatBotTab" name="chatBotTab">
+                Open Chatbot-->
+            <div class="chatBotTab">
                 Open Chatbot
-            </input>
+            </div>
             <div class="chatBotMessageBox">
                 <p>
                     Hello, ask me any questions about Culinary Argan Oil!
@@ -33,5 +34,30 @@
                 Parapgraph tag text here
             </p>
         </div>
+        <script class="chatBoxMoveScript" async="false" defer>
+            let chatBoxTab = document.querySelector(".chatBotTab");
+            chatBoxTab.addEventListener("click", toggleChatBox);
+
+
+            //function definitions
+            /**
+             * adds/removes the openedChatBox class from styles to make the chatBox
+             * visible or not
+             */
+            function toggleChatBox(){
+                const chatBox = document.querySelector(".chatBotBox");
+                chatBox.classList.toggle("openChatBox");
+                const tab = document.querySelector(".chatBotTab");
+                let tabText = tab.textContent;
+
+                if(tabText.trim().includes("Open")){
+                    tabText = "Close Chatbot";
+                }else{
+                    tabText = "Open Chatbot";
+                }
+                tab.textContent = tabText;
+                //console.log("openedChatBox");
+            }
+        </script>
     </body>
 </html>
