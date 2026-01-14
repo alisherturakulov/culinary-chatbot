@@ -22,7 +22,7 @@
                 <input type="text" name="chatBotInput" class="chatBotInput" placeholder="Example: what are the benefits of Argan Oil?">
 
                 </input>
-                <button class="chatBotButton" type="button" on onclick="postUserMessage()">
+                <button class="chatBotButton" type="button" on onclick="getAnswer()">
                     Enter
                 </button>
             </div>
@@ -63,16 +63,48 @@
             }
 
             /**
+             * calls posUserMessage and adds answer as a message
+            */
+            async function getAnswer(){
+                postUserMessage().then((ans) =>{
+                    addBotMessage(ans);
+                });
+            }
+
+            /**
              * adds the question to the messageList and sends a request to the backend
              * @see addUserMessage
             */
-            function postUserMessage(){
+            async function postUserMessage(){
                 const userInputField = document.querySelector(".chatBotInput");
                 const questionText = userInputField.value;
-                console.log(questionText + "passed");
+                //console.log(questionText + "passed");
+                if(questionText == ""){
+                    console.error("error; question not given");
+                    return;
+                }
                 addUserMessage(questionText);
                 //next send a request to the backend script
-                
+                const url = new URL("http://127.0.0.1:3000");
+                try{
+                const response = await fetch(url, {
+                    method:"POST",
+                    headers:{
+                        'Content-Type':'text/plain'
+                    },
+                    body:questionText,
+                });
+                if(!response.ok){
+                    throw new Error("error in response:" + response.status);
+                    
+                }               
+                return response.body;
+
+                }catch(err){
+                    console.error("Error fetching response from server; "+ err.message);
+                    throw err;
+                    //return;
+                }
             }
 
             /**
@@ -83,10 +115,22 @@
                 const userMessage= document.createElement("p");
                 userMessage.classList.add("userMessage");
                 userMessage.textContent = questionText;
-                console.log(userMessage.textContent);
+                //console.log(userMessage.textContent);
                 const messageList = document.querySelector(".chatBotMessageBox");
                 messageList.lastChild.after(userMessage);
-                console.log(messageList.lastChild.textContent);
+                //console.log(messageList.lastChild.textContent);
+            }
+
+            /**
+             * Adds a bot message with the given text
+             * param {string} answerText
+            */
+            function addBotMessage(answerText){
+                const botMessage = document.createElement("p");
+                botMessage.classList.add("botMessage");
+                botMessage.textContent = answerText;
+                const messageList = document.querySelector(".chatBotMessageBox");
+                messageList.appendChild(botMessage);
             }
         </script>
     </body>

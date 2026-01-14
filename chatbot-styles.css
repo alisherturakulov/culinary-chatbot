@@ -43,16 +43,18 @@ p{
 }
 
 .chatBotInputBox{
-    display:flex;
+    position:relative;
     text-align:center;
-    margin:1px;
-    bottom:1px;
+   
+    display:block;
+    height:auto;
 }
 .chatBotInput{
-    flex: auto;
+    width:70%;
+    
 }
 .chatBotButton{
-    flex-basis:20%;
+   width:20%;
     
 }
 
