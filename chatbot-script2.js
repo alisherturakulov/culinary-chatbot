@@ -1,12 +1,20 @@
-//chatbot backend script using gemini
-
+//Script for chatbot backend
 require("dotenv").config();
-const OpenAI = require("openai");
+const {GoogleGenAI} = require('@google/genai');
 
+const ai = new GoogleGenAI({});
 
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+//const GoogleGenAI = require("@google/genai");
+
+const http = require('http');//to listen for post requests from frontend
+const fs = require('fs');
+const path = require('path');
+const { isPromise } = require("util/types");
+
+//const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 //console.log(process.env);
-console.log(OPENAI_API_KEY);
+//console.log(OPENAI_API_KEY);
  
 
 const botInstructions = `
@@ -109,10 +117,48 @@ const botInstructions = `
                         What does 'pharmaceutical grade' mean?
                         For Argan oil: a creative marketing term, so just nonsense really. There are 4 grades of Argan oil; Extra Virgin Argan Oil: EVAO(ours) is the best quality. Tested by lab, regulated by government.
                         `;
+    
+    const server = http.createServer((req, res) => {
+        //const userInput = "where is your argan oil sourced?";
+        //let ans="placeholder";
+        console.log("url:" + req.url + "\nbody:"+req.body);
+         let userInput = "placeholder";
+        try{
+       
+        }catch(err){
+            //throw new Error
+            console.log("error getting request body" + err.message);
+        }
+        try{
+            //ans = getAnswer(req.body);
+            //console.log(ans);
+            req.on("end", () => {
+                userInput =  req.body.toString();
+            });
+                
+            
+            
+        }catch(error){
+            console.error("error getting response: "+ error.message);
+            res.writeHead(500, {'Content-Type': "text/plain"});
+            res.end("There was an error getting a response from the server", 'utf-8');
+        }
 
-    const userInput = "where is your argan oil sourced?";
-    const ans = getAnswer(userInput);
-    console.log("Question: where is argan oil sourced?\nModel response:\n");
+        getAnswer(userInput).then((ans) =>{
+                res.writeHead(200, {'Content-Type':'text/plain'});
+                res.end(ans, 'utf-8');
+        });
+       
+        
+    });
+
+    const PORT = 3000;
+    const HOST ="127.0.0.1";
+    server.listen(PORT,HOST, () =>{
+        console.log('Server listening on: http://localhost:3000');
+    });
+
+
 //function definitions
 
     /**
@@ -120,17 +166,19 @@ const botInstructions = `
      * @param {string} question 
      */
     async function getAnswer(question){
-        
-        const client = new OpenAI();
-        const response = await client.responses.create({
-            model:"gpt-5-nano",
-            input: question,
-            instructions: botInstructions,
+        await question;
+        //const client = new GoogleGenAI({});
+        //const ai =     new GoogleGenAI({});
+        const response = await ai.models.generateContent({
+            model:"gemini-2.5-flash-lite",
+            content: question,
+            config:{
+                systemInstruction: botInstructions,
+            },
         });
-
-
-        
-       // console.log(response.output_text);
-       return response.output_text;
+        console.log(response.text);
+       //console.log("Question: " + question +"\nModel response:\n");
+       //console.log(response.output_text);
+       return response.text;
     }
 

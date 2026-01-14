@@ -7,9 +7,9 @@ const fs = require('fs');
 const path = require('path');
 const { isPromise } = require("util/types");
 
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+//const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 //console.log(process.env);
-console.log(OPENAI_API_KEY);
+//console.log(OPENAI_API_KEY);
  
 
 const botInstructions = `
