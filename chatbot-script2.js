@@ -125,35 +125,48 @@ const botInstructions = `
         //const userInput = "where is your argan oil sourced?";
         //let ans="placeholder";
         //console.log("url:" + req.url + "\nbody:"+req.body);
-         let userInput = "placeholder";
-     
-        try{
-            //ans = getAnswer(req.body);
-            //console.log(ans);
-            let body= '';
-            for await (const chunk of req.body){
-                body += chunk;
-                if(body.length() > 1000){
-                    console.error("Request body too large, cut off at 1000");
-                    throw error;
-                }
-            }
-            req.on("end", () => {
-                userInput =  body;
-            });
-                
-            
-            
-        }catch(error){
-            console.error("error getting response: "+ error.message);
-            res.writeHead(500, {'Content-Type': "text/plain"});
-            res.end("There was an error getting a response from the server", 'utf-8');
-        }
+         
+        
+        
+        //ans = getAnswer(req.body);
+        //console.log(ans);
+        let body= '';
+        req.on( "data", (data) => {//because I cant use for await data of body
+            body += data;
+            // if(body.toString().length() > 1000){
+            //     console.error("Request body too large, cut off at 1000");
+            //     throw error;
+            // }
+        });
 
-        getAnswer(userInput).then((ans) =>{
+        req.on("end", () => {//once body is received
+            const userInput =  body.toString();
+            //console.log("end userInput: " + userInput);
+
+            getAnswer(userInput).then((ans) => {
                 res.writeHead(200, {'Content-Type':'text/plain'});
                 res.end(ans, 'utf-8');
+            }).catch((error) => {
+                console.error("error getting response: "+ error.message);
+                res.writeHead(500, {'Content-Type': "text/plain"});
+                res.end("There was an error getting a response from the server", 'utf-8');
+            });
+
         });
+
+       
+            
+        // getAnswer(userInput).then((ans) => {
+        //     res.writeHead(200, {'Content-Type':'text/plain'});
+        //     res.end(ans, 'utf-8');
+        // }).catch((error) =>{
+        //     console.error("error getting response: "+ error.message);
+        //     res.writeHead(500, {'Content-Type': "text/plain"});
+        //     res.end("There was an error getting a response from the server", 'utf-8');
+        // });
+            
+        
+        
        
         
     });
@@ -192,3 +205,13 @@ const botInstructions = `
         return response.text;
     }
 
+    //Example response (test passed)
+// question: what is argan oil?
+// response: Culinary Argan Oil is a high-quality, extra virgin, org
+// anic cold-pressed oil made from kernels wild-harvested in the Arg
+// an Bio-Reservoir around Taroudant. The process involves hand-crac
+// king the fruits, artisanal roasting by a 'maître torréfacteur,' a
+// nd small-batch cold pressing with rigorous filtration. This resul
+// ts in a luminous oil with rich hazelnut and pistachio notes and a
+//  crisp finish, intended to enhance cooking experiences with its f
+// lavor and health benefits.

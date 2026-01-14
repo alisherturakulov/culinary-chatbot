@@ -116,35 +116,28 @@ const botInstructions = `
     const server = http.createServer((req, res) => {
         //const userInput = "where is your argan oil sourced?";
         //let ans="placeholder";
-        console.log("url:" + req.url + "\nbody:"+req.body);
-         let userInput = "placeholder";
-        try{
-       
-        }catch(err){
-            //throw new Error
-            console.log("error getting request body" + err.message);
-        }
-        try{
-            //ans = getAnswer(req.body);
-            //console.log(ans);
-            req.on("end", () => {
-                userInput =  req.body.toString();
-            });
-                
-            
-            
-        }catch(error){
-            console.error("error getting response: "+ error.message);
-            res.writeHead(500, {'Content-Type': "text/plain"});
-            res.end("There was an error getting a response from the server", 'utf-8');
-        }
+       let body= '';
+        req.on( "data", (data) => {//because I cant use for await data of body
+            body += data;
+            // if(body.toString().length() > 1000){
+            //     console.error("Request body too large, cut off at 1000");
+            //     throw error;
+            // }
+        });
 
-        getAnswer(userInput).then((ans) =>{
+        req.on("end", () => {//once body is received
+            const userInput =  body.toString();
+            //console.log("end userInput: " + userInput);
+
+            getAnswer(userInput).then((ans) => {
                 res.writeHead(200, {'Content-Type':'text/plain'});
                 res.end(ans, 'utf-8');
-        });
-       
-        
+            }).catch((error) => {
+                console.error("error getting response: "+ error.message);
+                res.writeHead(500, {'Content-Type': "text/plain"});
+                res.end("There was an error getting a response from the server", 'utf-8');
+            });
+        });        
     });
 
     const PORT = 3000;
