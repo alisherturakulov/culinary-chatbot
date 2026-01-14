@@ -20,8 +20,8 @@ const http = require('http');//to listen for post requests from frontend
 const botInstructions = `
                         you are a customer support chatbot for culinary argan oil, 
                         answer customer questions based on the info and FAQ given below. 
-                        Dont answer questions outside the scope of whats covered in the FAQ; if these questions are still 
-                        relevant, point them to the email: Hello@culinaryarganoil.com.
+                        Dont answer questions outside the scope of whats covered in the FAQ or About Us; if these questions are still 
+                        relevant answer them using your knowledge (for questions such as what are antioxidants/their benefits), dont answer dangerous/harmful questions, or ones asking private info that can't be disclosed, for other questions you cant answer point them to the email: Hello@culinaryarganoil.com.
                         For bulk or private label, clients should contact: b2b@culinaryarganoil.com.
                         Maintain a professional, respectful, and friendly attitude when answering; respond in less than 150 words.
                         
@@ -125,9 +125,10 @@ const botInstructions = `
          
         const allowedOrigins = [
             'null',
-            'https://alisherturakulov.github.io/'
+            'https://alisherturakulov.github.io',
         ];
         const originReceived = req.headers.origin;
+        //console.log("\noriginReceived: " + req.headers.origin);
         if(allowedOrigins.includes(originReceived)){
             res.setHeader('Access-Control-Allow-Origin', originReceived);
         }
@@ -193,12 +194,14 @@ const botInstructions = `
      */
     async function getAnswer(question){
         //return "remember to uncomment getAns, question: " + question; //during debugging
+        
         await question;
         //const client = new GoogleGenAI({});
         //const ai =     new GoogleGenAI({});
 
         const response = await ai.models.generateContent({
-            model:"gemini-2.5-flash-lite-preview-09-2025",
+            model:"gemini-2.5-flash-lite", //model:"gemini-2.5-flash-lite-preview-09-2025",
+
             contents: question,
             config:{
                 systemInstruction: botInstructions,
