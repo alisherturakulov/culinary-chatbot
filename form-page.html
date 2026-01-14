@@ -22,7 +22,7 @@
                 <input type="text" name="chatBotInput" class="chatBotInput" placeholder="Example: what are the benefits of Argan Oil?">
 
                 </input>
-                <button class="chatBotButton" type="button" on onclick="getAnswer()">
+                <button class="chatBotButton" type="button" onclick="getAnswer()">
                     Enter
                 </button>
             </div>
@@ -68,6 +68,8 @@
             async function getAnswer(){
                 postUserMessage().then((ans) =>{
                     addBotMessage(ans);
+                }).catch((err) =>{
+                    console.error("error in getAnswer: " +err.message);
                 });
             }
 
@@ -85,20 +87,21 @@
                 }
                 addUserMessage(questionText);
                 //next send a request to the backend script
-                const url = new URL("http://127.0.0.1:3000");
+                const url = new URL("http://127.0.0.1:3000/");
                 try{
-                const response = await fetch(url, {
-                    method:"POST",
-                    headers:{
-                        'Content-Type':'text/plain'
-                    },
-                    body:questionText,
-                });
-                if(!response.ok){
-                    throw new Error("error in response:" + response.status);
-                    
-                }               
-                return response.body;
+                    const response = await fetch(url, {
+                        method:"POST",
+                        /*headers:{
+                            'Content-Type':'text/plain'
+                        },*/
+                        body: questionText,
+                    }); 
+                    if(!response.ok){
+                        throw new Error("error in response:" + response.status);
+                        
+                    }        
+                    const answer = await response.text();       
+                    return answer;
 
                 }catch(err){
                     console.error("Error fetching response from server; "+ err.message);
