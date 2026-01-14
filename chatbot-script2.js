@@ -10,9 +10,6 @@ const ai = new GoogleGenAI({apiKey: GEMINI_API_KEY });
 //const GoogleGenAI = require("@google/genai");
 
 const http = require('http');//to listen for post requests from frontend
-const fs = require('fs');
-const path = require('path');
-const { isPromise } = require("util/types");
 
 //const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
@@ -126,7 +123,14 @@ const botInstructions = `
         //let ans="placeholder";
         //console.log("url:" + req.url + "\nbody:"+req.body);
          
-        
+        const allowedOrigins = [
+            'null',
+            'https://alisherturakulov.github.io/'
+        ];
+        const originReceived = req.headers.origin;
+        if(allowedOrigins.includes(originReceived)){
+            res.setHeader('Access-Control-Allow-Origin', originReceived);
+        }
         
         //ans = getAnswer(req.body);
         //console.log(ans);
@@ -144,8 +148,10 @@ const botInstructions = `
             //console.log("end userInput: " + userInput);
 
             getAnswer(userInput).then((ans) => {
+                //res.setHeader('Access-Control-Allow-Origin', 'null'); null for local file origin
                 res.writeHead(200, {'Content-Type':'text/plain'});
                 res.end(ans, 'utf-8');
+                //console.log("res.closed and sent: " + res.closed +res.headersSent);
             }).catch((error) => {
                 console.error("error getting response: "+ error.message);
                 res.writeHead(500, {'Content-Type': "text/plain"});
@@ -186,6 +192,7 @@ const botInstructions = `
      * @param {string} question 
      */
     async function getAnswer(question){
+        //return "remember to uncomment getAns, question: " + question; //during debugging
         await question;
         //const client = new GoogleGenAI({});
         //const ai =     new GoogleGenAI({});
@@ -198,14 +205,15 @@ const botInstructions = `
             },
         });
         
-       
-        console.log("question: " + question + "\nresponse: " +response.text);
-       //console.log("Question: " + question +"\nModel response:\n");
-       //console.log(response.output_text);
-        return response.text;
+        const ans = await response.text;
+        console.log("\nquestion: " + question + "\nresponse: " +ans);
+        //console.log("Question: " + question +"\nModel response:\n");
+        //console.log(response.output_text);
+        return ans;
     }
 
-    //Example response (test passed)
+    //Example responses (from tests)
+
 // question: what is argan oil?
 // response: Culinary Argan Oil is a high-quality, extra virgin, org
 // anic cold-pressed oil made from kernels wild-harvested in the Arg
@@ -215,3 +223,23 @@ const botInstructions = `
 // ts in a luminous oil with rich hazelnut and pistachio notes and a
 //  crisp finish, intended to enhance cooking experiences with its f
 // lavor and health benefits.
+
+
+// question: what is argan oil? What can I do with it?
+// response: Culinary Argan Oil is an organic, cold-pressed, extra v
+// irgin oil derived from kernels wild-harvested in the Argan Bio-Re
+// servoir. The resulting oil is luminous, balancing rich hazelnut a
+// nd pistachio notes with a crisp finish.
+//
+// It is versatile, suitable for both cooking and finishing due to i
+// ts smoke point of about 170°C. While you can bake with it, avoid
+// deep-frying or high-heat wok cooking. Recipes are available on ou
+// r website!
+
+// question: Where is the Argan oil from? Any Recipes?
+// response: Our culinary argan oil is wild harvested in the Argan B
+// io-Reservoir around Taroudant.
+
+// Regarding recipes, they are available on our website. I hope you
+// enjoy exploring them!
+

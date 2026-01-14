@@ -3,9 +3,7 @@ require("dotenv").config();
 const OpenAI = require("openai");
 
 const http = require('http');//to listen for post requests from frontend
-const fs = require('fs');
-const path = require('path');
-const { isPromise } = require("util/types");
+
 
 //const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 //console.log(process.env);
@@ -116,7 +114,20 @@ const botInstructions = `
     const server = http.createServer((req, res) => {
         //const userInput = "where is your argan oil sourced?";
         //let ans="placeholder";
-       let body= '';
+        //console.log("url:" + req.url + "\nbody:"+req.body);
+            
+        const allowedOrigins = [
+            'null',
+            'https://alisherturakulov.github.io/',
+        ];
+        const originReceived = req.headers.origin;
+        if(allowedOrigins.includes(originReceived)){
+            res.setHeader('Access-Control-Allow-Origin', originReceived);
+        }
+        
+        //ans = getAnswer(req.body);
+        //console.log(ans);
+        let body= '';
         req.on( "data", (data) => {//because I cant use for await data of body
             body += data;
             // if(body.toString().length() > 1000){
@@ -130,14 +141,17 @@ const botInstructions = `
             //console.log("end userInput: " + userInput);
 
             getAnswer(userInput).then((ans) => {
+                //res.setHeader('Access-Control-Allow-Origin', 'null'); null for local file origin
                 res.writeHead(200, {'Content-Type':'text/plain'});
                 res.end(ans, 'utf-8');
+                //console.log("res.closed and sent: " + res.closed +res.headersSent);
             }).catch((error) => {
                 console.error("error getting response: "+ error.message);
                 res.writeHead(500, {'Content-Type': "text/plain"});
                 res.end("There was an error getting a response from the server", 'utf-8');
             });
-        });        
+
+        });
     });
 
     const PORT = 3000;
@@ -154,16 +168,23 @@ const botInstructions = `
      * @param {string} question 
      */
     async function getAnswer(question){
-        await question;
-        const client = new OpenAI();
-        const response = await client.responses.create({
-            model:"gpt-5-nano",
-            input: question,
-            instructions: botInstructions,
-        });
-        
-       //console.log("Question: " + question +"\nModel response:\n");
-       //console.log(response.output_text);
-       return response.output_text;
+        try{
+            await question;
+            const client = new OpenAI();
+            const response = await client.responses.create({
+                model:"gpt-5-nano",
+                input: question,
+                instructions: botInstructions,
+            });
+            
+            const ans = await response.output_text;
+            console.log("\nquestion: " + question + "\nresponse: " +ans);
+            //console.log("Question: " + question +"\nModel response:\n");
+            //console.log(response.output_text);
+            return ans;
+        }catch(error){
+            console.error("Error in openai respnonse" + error.message);
+            return error.message;
+        }
     }
 

@@ -69,6 +69,7 @@
                 postUserMessage().then((ans) =>{
                     addBotMessage(ans);
                 }).catch((err) =>{
+                    addBotMessage("Internal Server Error: " + err.message);
                     console.error("error in getAnswer: " +err.message);
                 });
             }
@@ -83,7 +84,7 @@
                 //console.log(questionText + "passed");
                 if(questionText == ""){
                     console.error("error; question not given");
-                    return;
+                    return "Error; please enter a valid question";
                 }
                 addUserMessage(questionText);
                 //next send a request to the backend script
@@ -97,14 +98,17 @@
                         body: questionText,
                     }); 
                     if(!response.ok){
-                        throw new Error("error in response:" + response.status);
+                        throw new Error("response not ok: " + response.status);
                         
                     }        
-                    const answer = await response.text();       
+                    
+                    const answer = await response.text(); 
+                    console.log("answer is: " + answer);
                     return answer;
+                    
 
                 }catch(err){
-                    console.error("Error fetching response from server; "+ err.message);
+                    console.error("Error in postM: "+ err.message);
                     throw err;
                     //return;
                 }
@@ -129,6 +133,7 @@
              * param {string} answerText
             */
             function addBotMessage(answerText){
+                //console.log("adding bot message: " + answerText);
                 const botMessage = document.createElement("p");
                 botMessage.classList.add("botMessage");
                 botMessage.textContent = answerText;
