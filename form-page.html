@@ -13,31 +13,34 @@
                 Open Chatbot
             </div>
             <div class="chatBotMessageBox">
-                <p>
+                <p class="botMessage">
                     Hello, ask me any questions about Culinary Argan Oil!
                 </p>
+                <!-- class= "userMessage" for user-->
             </div>
             <div class="chatBotInputBox">
                 <input type="text" name="chatBotInput" class="chatBotInput" placeholder="Example: what are the benefits of Argan Oil?">
 
                 </input>
-                <button class="chatBotButton" type="button" action="">
+                <button class="chatBotButton" type="button" on onclick="postUserMessage()">
                     Enter
                 </button>
             </div>
         </div>
         <div>
             <h1>
-                Placeholder Heading
+                Placeholder Heading; tis would be a webpage
             </h1>
             <p>
-                Parapgraph tag text here
+                click on "Open Chatbot" to bring the chat UI into view
             </p>
         </div>
         <script class="chatBoxMoveScript" async="false" defer>
             let chatBoxTab = document.querySelector(".chatBotTab");
             chatBoxTab.addEventListener("click", toggleChatBox);
-
+            const clickEvent = new Event("click");
+            chatBoxTab.dispatchEvent(clickEvent);
+          
 
             //function definitions
             /**
@@ -57,6 +60,33 @@
                 }
                 tab.textContent = tabText;
                 //console.log("openedChatBox");
+            }
+
+            /**
+             * adds the question to the messageList and sends a request to the backend
+             * @see addUserMessage
+            */
+            function postUserMessage(){
+                const userInputField = document.querySelector(".chatBotInput");
+                const questionText = userInputField.value;
+                console.log(questionText + "passed");
+                addUserMessage(questionText);
+                //next send a request to the backend script
+                
+            }
+
+            /**
+             * adds a p element as a user message to the chat
+             * param {string} questionText
+            */
+            function addUserMessage(questionText){
+                const userMessage= document.createElement("p");
+                userMessage.classList.add("userMessage");
+                userMessage.textContent = questionText;
+                console.log(userMessage.textContent);
+                const messageList = document.querySelector(".chatBotMessageBox");
+                messageList.lastChild.after(userMessage);
+                console.log(messageList.lastChild.textContent);
             }
         </script>
     </body>
