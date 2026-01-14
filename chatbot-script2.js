@@ -2,7 +2,10 @@
 require("dotenv").config();
 const {GoogleGenAI} = require('@google/genai');
 
-const ai = new GoogleGenAI({});
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+//console.log("GEMINI API KEY: " + GEMINI_API_KEY);
+
+const ai = new GoogleGenAI({apiKey: GEMINI_API_KEY });
 
 //const GoogleGenAI = require("@google/genai");
 
@@ -12,7 +15,7 @@ const path = require('path');
 const { isPromise } = require("util/types");
 
 //const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+
 //console.log(process.env);
 //console.log(OPENAI_API_KEY);
  
@@ -121,19 +124,22 @@ const botInstructions = `
     const server = http.createServer((req, res) => {
         //const userInput = "where is your argan oil sourced?";
         //let ans="placeholder";
-        console.log("url:" + req.url + "\nbody:"+req.body);
+        //console.log("url:" + req.url + "\nbody:"+req.body);
          let userInput = "placeholder";
-        try{
-       
-        }catch(err){
-            //throw new Error
-            console.log("error getting request body" + err.message);
-        }
+     
         try{
             //ans = getAnswer(req.body);
             //console.log(ans);
+            let body= '';
+            for await (const chunk of req.body){
+                body += chunk;
+                if(body.length() > 1000){
+                    console.error("Request body too large, cut off at 1000");
+                    throw error;
+                }
+            }
             req.on("end", () => {
-                userInput =  req.body.toString();
+                userInput =  body;
             });
                 
             
@@ -154,6 +160,7 @@ const botInstructions = `
 
     const PORT = 3000;
     const HOST ="127.0.0.1";
+
     server.listen(PORT,HOST, () =>{
         console.log('Server listening on: http://localhost:3000');
     });
@@ -169,16 +176,19 @@ const botInstructions = `
         await question;
         //const client = new GoogleGenAI({});
         //const ai =     new GoogleGenAI({});
+
         const response = await ai.models.generateContent({
-            model:"gemini-2.5-flash-lite",
-            content: question,
+            model:"gemini-2.5-flash-lite-preview-09-2025",
+            contents: question,
             config:{
                 systemInstruction: botInstructions,
             },
         });
-        console.log(response.text);
+        
+       
+        console.log("question: " + question + "\nresponse: " +response.text);
        //console.log("Question: " + question +"\nModel response:\n");
        //console.log(response.output_text);
-       return response.text;
+        return response.text;
     }
 
