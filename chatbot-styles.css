@@ -2,40 +2,62 @@
 Styles for chatbot ui
 */
 
+/*@media(prefers-reduced-motion:reduce) {
+    html * {
+	    transition-delay: 0s !important;
+	    transition-duration: 0s !important;
+    }
+}*/
+
 body{
-    background-color:lightsteelblue;
+    background-color:rgb(191, 203, 218);
 }
 
 .chatBotBox{
-    border:2px solid slategray;
-    background-color:bisque;
+    border:2px solid #040203;
+    background-color:rgb(249, 248, 246);
     position:fixed;
     bottom: -25%;
     right: 25px;
     height:30%;
-    width:50%;
-    transition:all 1s ease-in-out;
-    
+    width:43%;
+    transition:bottom 1s ease-in-out;
+    /*border-radius:10px;*/
+    font-size:small;
+    display:flex;
+    flex-direction: column;
 }
 
 .chatBotTab{
-    border: 1px solid linen;
-    margin: .3rem;
-    font-size: 1rem;
+    border:3px solid #f4a609;
+    /*border-radius: 10px;*/
+    margin-top: .1em;
+    margin-bottom:.1em;
+    font-size: 1em;
+    background-color:#f4a609;
+    height:7%;
+}
+
+.chatBotTab:hover{
+    background-color:#ffb049;
+
 }
 
 .chatBotMessageBox{
-    height: 70%;
+    height:71%;
     overflow-y:scroll;
-    position:relative;    
+    position:relative;
+    font-size: 1em;  
+    margin: .2em;
 }
 
 p{
     font-family:Georgia, 'Times New Roman', Times, serif;
-    border:solid 1px burlywood;
+    border:solid 2px burlywood;
     width:inherits;
     margin-bottom:10px;
-    overflow-wrap: break-word;
+    overflow-wrap:break-word;
+    font-size:1em;
 }
 
 .userMessage{
@@ -45,17 +67,21 @@ p{
 .chatBotInputBox{
     position:relative;
     text-align:center;
-   
     display:block;
-    height:auto;
+    padding:1px;
+    margin:0px;
+    padding:1px;
+    height:15%;
 }
+
 .chatBotInput{
-    width:70%;
+    width:77%;
     
 }
 .chatBotButton{
    width:20%;
-    
+   background-color: #f4a609;
+   border:1px solid white;
 }
 
 .openChatBox{
@@ -65,8 +91,9 @@ p{
     animation-iteration-count: 1;
     animation-play-state: running;
     animation;*/
-    bottom: 30px;
+    bottom: 10px;
     /*transition: all 2s ease-in;*/
+    
 }
 
 

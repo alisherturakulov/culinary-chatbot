@@ -69,7 +69,7 @@
                 postUserMessage().then((ans) =>{
                     addBotMessage(ans);
                 }).catch((err) =>{
-                    addBotMessage("Internal Server Error: " + err.message);
+                    addBotMessage("Error: " + err.message);
                     console.error("error in getAnswer: " +err.message);
                 });
             }
