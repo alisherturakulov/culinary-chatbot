@@ -234,15 +234,25 @@ const botInstructions = `
      function tooManyRequests(req, res){
         console.log("entered function tooManyRequests");
         try{
-            const cookieStr = req.headers.cookie;
+            
+            const cookieStr = req.rawHeaders;
+            for(const item of cookieStr){
+                console.log(item);
+            }
+
+            //console.log("cookieStr: " + cookieStr);
+            
+            //console.log("set " + req.headers.set-cookie);
+            
             if(cookieStr === undefined ||cookieStr==''|| !cookieStr.includes('ChatRequests')){
                 const millisecondsInAnHour = 3600000;
                 let expirationDate = new Date();
                 expirationDate.setTime(expirationDate.getTime() + millisecondsInAnHour); 
-                expirationDate = expirationDate.toUTCString();  //to pass into Expires option            
-                res.setHeader('Set-Cookie', `ChatRequests=1; Expires=${expirationDate}; Secure; HttpOnly; SameSite=Strict`);
+                expirationDate = expirationDate.toUTCString();  //to pass into Expires option    
+                const initRequests = 1;        
+                res.setHeader('Set-Cookie', `ChatRequests=${initRequests}; Expires=${expirationDate}; Secure; HttpOnly; SameSite=Strict`);
                 res.setHeader('Set-Cookie', `ExpiryDate=${expirationDate}; Expires=${expirationDate}; Secure; HttpOnly; SameSite=Strict`);
-                console.log("created cookies");
+                console.log("created cookies: " + res.getHeader("Set-Cookie"));
                 return false;//httponly to guard against client side cookie editing
             }else if(cookieStr.includes("ChatRequests")){
                 console.log('cookieStr: '+ cookieStr);
@@ -271,8 +281,8 @@ const botInstructions = `
                 return false;
             }
         }catch(error){
-            console.log(error.message + " in too many");
-            console.error("Error with cookies: " + error.message);
+            console.log("error in too many: " + error.message);
+            console.error(error.stack);
             throw error;//to be caught in create server
         }
     }

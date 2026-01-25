@@ -75,10 +75,9 @@
                 }).catch((err) =>{
                     addBotMessage("Error: " + err.message);
                     console.error("error in getAnswer: " +err.message);
-                }).finally(() =>{
+                }).finally(() =>{//to prevent spam
                     button.setAttribute("onclick", "getAnswer()");
-                });
-               
+                });    
             }
 
             /**

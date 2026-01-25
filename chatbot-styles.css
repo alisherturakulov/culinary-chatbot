@@ -54,7 +54,7 @@ body{
 p{
     font-family:Georgia, 'Times New Roman', Times, serif;
     border:solid 2px burlywood;
-    width:inherits;
+    /* width: inherits; */
     margin-bottom:10px;
     overflow-wrap:break-word;
     font-size:1em;
