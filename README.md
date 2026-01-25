@@ -2,10 +2,10 @@
 
 ## Instrucitons To Test
  - For running server side js files: Nodejs 24
- 	-  packages: dotenv, google/genai, openai
+ 	- packages: dotenv, google/genai, openai
  	- install by running npm install in the project directory
  - To run the scripts, API keys are required
- 	- Gemini api key for Chatbot-script2.js
+ 	- Gemini api key for chatbot-script2.js
  	- OpenAI api key for chatbot-script.js
  	- Add then to .env file as GEMINI_API_KEY="key" or OPENAI_API_KEY="key" on newlines
  - To run server scripts: node chatbot-script.js
@@ -19,13 +19,20 @@
 
 
 ## Timeline
- - Implement the basic HTML of the form popup page
- - Implement the backend api script
- - Implement frontend script for sending inputs via requests
- - Backend sends back model response and checks for errors
- - use gemini for testing, with openai script working but needing api key
- - [see the chatbot form page](https://alisherturakulov.github.io/culinary-chatbot/form-page.html)
-
+  
+-  Implement the basic HTML of the form popup page  
+  
+-  Implement the backend api script  
+  
+-  Implement frontend script for sending inputs via requests  
+  
+-  Backend sends back model response and checks for errors  
+  
+-  Gemini and OpenAI api model scripts work with api keys  
+  
+-  Rate limiting on the frontend; questions cant be submitted until the most recent request is answered  
+  
+-  In progress: Backend rate limiting using cookies to track requests from a given client; request quota resets every hour  
 
  ## Sample Question Answer:
  - Question: what is argan oil?
