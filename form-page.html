@@ -22,7 +22,7 @@
                 <input type="text" name="chatBotInput" class="chatBotInput" placeholder="Example: what are the benefits of Argan Oil?">
 
                 </input>
-                <button class="chatBotButton" type="button" onclick="getAnswer()">
+                <button class="chatBotButton"  type="button" onclick="getAnswer()">
                     Enter
                 </button>
             </div>
@@ -66,12 +66,19 @@
              * calls posUserMessage and adds answer as a message
             */
             async function getAnswer(){
+                const button = document.querySelector(".chatBotButton");
+                button.setAttribute("onclick", "");
+                //console.log("button onclick after click: " + button.getAttribute("onclick"));
+                //button.setAttribute("hidden", "true");
                 postUserMessage().then((ans) =>{
                     addBotMessage(ans);
                 }).catch((err) =>{
                     addBotMessage("Error: " + err.message);
                     console.error("error in getAnswer: " +err.message);
+                }).finally(() =>{
+                    button.setAttribute("onclick", "getAnswer()");
                 });
+               
             }
 
             /**

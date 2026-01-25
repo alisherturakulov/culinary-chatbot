@@ -1,6 +1,7 @@
 //Script for chatbot backend
 require("dotenv").config();
 const {GoogleGenAI} = require('@google/genai');
+const { countReset } = require("console");
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 //console.log("GEMINI API KEY: " + GEMINI_API_KEY);
@@ -118,14 +119,15 @@ const botInstructions = `
                         For Argan oil: a creative marketing term, so just nonsense really. There are 4 grades of Argan oil; Extra Virgin Argan Oil: EVAO(ours) is the best quality. Tested by lab, regulated by government.
                         `;
     
+ 
     const server = http.createServer((req, res) => {
-        //const userInput = "where is your argan oil sourced?";
         //let ans="placeholder";
         //console.log("url:" + req.url + "\nbody:"+req.body);
          
         const allowedOrigins = [
             'null',
             'https://alisherturakulov.github.io',
+            'https://culinaryarganoil.com',
         ];
         const originReceived = req.headers.origin;
         //console.log("\noriginReceived: " + req.headers.origin);
@@ -136,7 +138,7 @@ const botInstructions = `
         //ans = getAnswer(req.body);
         //console.log(ans);
         let body= '';
-        req.on( "data", (data) => {//because I cant use for await data of body
+        req.on( "data", (data) => {//because await is used in asych functions
             body += data;
             // if(body.toString().length() > 1000){
             //     console.error("Request body too large, cut off at 1000");
@@ -145,6 +147,20 @@ const botInstructions = `
         });
 
         req.on("end", () => {//once body is received
+            try{
+                const tooMany = tooManyRequests(req, res);
+                if(tooMany){
+                    console.log("from tooMany returned: " + tooMany);
+                    console.log(req.headers.cookie);
+                    res.writeHead(429, {'Content-Type':'text/plain'});
+                    res.end("Error: Too Many Requests", 'utf-8');
+                    return;
+                }
+            }catch(error){
+                console.error("error:" + error.message);
+                res.writeHead(500, {'Content-Type':'text/plain'});
+                res.end('error accessing cookie store', 'utf-8');
+            }
             const userInput =  body.toString();
             //console.log("end userInput: " + userInput);
 
@@ -160,9 +176,7 @@ const botInstructions = `
             });
 
         });
-
-       
-            
+        
         // getAnswer(userInput).then((ans) => {
         //     res.writeHead(200, {'Content-Type':'text/plain'});
         //     res.end(ans, 'utf-8');
@@ -171,11 +185,6 @@ const botInstructions = `
         //     res.writeHead(500, {'Content-Type': "text/plain"});
         //     res.end("There was an error getting a response from the server", 'utf-8');
         // });
-            
-        
-        
-       
-        
     });
 
     const PORT = 3000;
@@ -193,27 +202,82 @@ const botInstructions = `
      * @param {string} question 
      */
     async function getAnswer(question){
-        //return "remember to uncomment getAns, question: " + question; //during debugging
+        return "remember to uncomment getAns, question: " + question; //during debugging
         
-        await question;
-        //const client = new GoogleGenAI({});
-        //const ai =     new GoogleGenAI({});
+        // await question;
+        // //const client = new GoogleGenAI({});
+        // //const ai =     new GoogleGenAI({});
 
-        const response = await ai.models.generateContent({
-            model:"gemini-2.5-flash-lite", //model:"gemini-2.5-flash-lite-preview-09-2025",
+        // const response = await ai.models.generateContent({
+        //     model:"gemini-2.5-flash-lite", //model:"gemini-2.5-flash-lite-preview-09-2025",
 
-            contents: question,
-            config:{
-                systemInstruction: botInstructions,
-            },
-        });
+        //     contents: question,
+        //     config:{
+        //         systemInstruction: botInstructions,
+        //     },
+        // });
         
-        const ans = await response.text;
-        console.log("\nquestion: " + question + "\nresponse: " +ans);
-        //console.log("Question: " + question +"\nModel response:\n");
-        //console.log(response.output_text);
-        return ans;
+        // const ans = await response.text;
+        // console.log("\nquestion: " + question + "\nresponse: " +ans);
+        // //console.log("Question: " + question +"\nModel response:\n");
+        // //console.log(response.output_text);
+        // return ans;
     }
+
+    /**
+     * checks the requests cookie in the cookie store; if it exists, increment its value
+     * if it doesnt exist, set a requests cookie that expires in an hour. The limit is 11 requests per hour.
+     * @param  {http.IncomingMessage} req request
+     * @param {http.ServerResponse<http.IncomingMessage>} res response
+     * @return {boolean} true if >11 requests in an hour; false otherwise
+     */
+     function tooManyRequests(req, res){
+        console.log("entered function tooManyRequests");
+        try{
+            const cookieStr = req.headers.cookie;
+            if(cookieStr === undefined ||cookieStr==''|| !cookieStr.includes('ChatRequests')){
+                const millisecondsInAnHour = 3600000;
+                let expirationDate = new Date();
+                expirationDate.setTime(expirationDate.getTime() + millisecondsInAnHour); 
+                expirationDate = expirationDate.toUTCString();  //to pass into Expires option            
+                res.setHeader('Set-Cookie', `ChatRequests=1; Expires=${expirationDate}; Secure; HttpOnly; SameSite=Strict`);
+                res.setHeader('Set-Cookie', `ExpiryDate=${expirationDate}; Expires=${expirationDate}; Secure; HttpOnly; SameSite=Strict`);
+                console.log("created cookies");
+                return false;//httponly to guard against client side cookie editing
+            }else if(cookieStr.includes("ChatRequests")){
+                console.log('cookieStr: '+ cookieStr);
+                const secondsInAHour = 3600;
+                const cookies = {};
+                const cookieList = cookieStr.split(';');//cookies name=value separated by semicolons
+                for(const pair in cookieList){
+                    pair=pair.trim();//incase theres a space after the semicolon
+                    pair = pair.split('=');
+                    cookies[pair[0].trim()] = pair[1];
+                }
+                
+                const ExpiryDate = cookies['ExpiryDate'];// UTC string
+                const ChatRequests = cookies['ChatRequests']; // string count
+                
+                const currentRequests = parseInt(ChatRequests, 10);
+                currentRequests++;
+                //cookies['ChatRequests'] = (parseInt(cookies['ChatRequests'])+1);//increment the count and reassign number
+                if(currentRequests >11){
+                    console.log("too many requests");
+                    return true;//will be limited until the cookie expires
+                }
+                res.setHeader('Set-Cookie', `ChatRequests=${currentRequests}; Expires=${ExpiryDate}; Secure; HttpOnly; SameSite=Strict`);
+                res.setHeader('Set-Cookie', `ExpiryDate=${ExpiryDate}; Expires=${ExpiryDate}; Secure; HttpOnly; SameSite=Strict`);
+                console.log("not too many; header incremneted");
+                return false;
+            }
+        }catch(error){
+            console.log(error.message + " in too many");
+            console.error("Error with cookies: " + error.message);
+            throw error;//to be caught in create server
+        }
+    }
+
+
 
     //Example responses (from tests)
 
