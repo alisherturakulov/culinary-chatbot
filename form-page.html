@@ -102,6 +102,7 @@
                             'Content-Type':'text/plain'
                         },*/
                         body: questionText,
+                        /*credentials:"include",*///to include cookies in req headers
                     }); 
                     if(!response.ok){
                         throw new Error("response not ok: " + response.status);
