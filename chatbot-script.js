@@ -112,23 +112,27 @@ const botInstructions = `
                         `;
     
     const server = http.createServer((req, res) => {
-        //const userInput = "where is your argan oil sourced?";
         //let ans="placeholder";
         //console.log("url:" + req.url + "\nbody:"+req.body);
-            
+         
         const allowedOrigins = [
-            'null',
+            'null',//only for testing; is unsafe otherwise
             'https://alisherturakulov.github.io',
+            'https://culinaryarganoil.com',
         ];
         const originReceived = req.headers.origin;
+        //console.log("\noriginReceived: " + req.headers.origin);
         if(allowedOrigins.includes(originReceived)){
             res.setHeader('Access-Control-Allow-Origin', originReceived);
+            // res.setHeader('Access-Control-Allow-Credentials', true);
+            // res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS, GET');
+            // res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, Set-Cookie, Cookie');
         }
-        
+       
         //ans = getAnswer(req.body);
         //console.log(ans);
         let body= '';
-        req.on( "data", (data) => {//because I cant use for await data of body
+        req.on( "data", (data) => {//because await is used in asych functions
             body += data;
             // if(body.toString().length() > 1000){
             //     console.error("Request body too large, cut off at 1000");
@@ -137,11 +141,11 @@ const botInstructions = `
         });
 
         req.on("end", () => {//once body is received
-                        // try{
+            // try{
             //     const tooMany = tooManyRequests(req, res);
             //     if(tooMany){
-            //         console.log("from tooMany returned: " + tooMany);
-            //         console.log(req.headers.cookie);
+            //         console.log("tooMany returned: " + tooMany);
+            //         console.log("cookies: " + req.headers.cookie);
             //         res.writeHead(429, {'Content-Type':'text/plain'});
             //         res.end("Error: Too Many Requests", 'utf-8');
             //         return;
@@ -151,10 +155,9 @@ const botInstructions = `
             //     res.writeHead(500, {'Content-Type':'text/plain'});
             //     res.end('error accessing cookie store', 'utf-8');
             // }
-            //console.log("created cookies: " + res.getHeader("Set-Cookie"));
-
+            // //console.log("created cookies: " + res.getHeader("Set-Cookie"));
             const userInput =  body.toString();
-            //console.log("end userInput: " + userInput);
+            
 
             getAnswer(userInput).then((ans) => {
                 //res.setHeader('Access-Control-Allow-Origin', 'null'); null for local file origin
@@ -213,84 +216,54 @@ const botInstructions = `
      * @return {boolean} true if >11 requests in an hour; false otherwise
      */
      function tooManyRequests(req, res){
-        //console.log("entered function tooManyRequests");
-        try{
-            
-            // const rawReqHeaders = req.rawHeaders;//even numbers are keys; odds their values
-            // let cookieStr;
-            // for(let i =0;i<rawReqHeaders.length;i++){
-            //     console.log(rawReqHeaders[i]);
-            //     if(rawReqHeaders[i] == "created cookies"){
-            //         cookieStr = rawReqHeaders[i+1];
-                    
-                    
-            //     }
-            //     //console.log(rawReqHeaders);
-            // }
-           
-            let foundCookies = false;
-            let cookieStr = req.headers.cookie;
-            console.log(req.headers);
-            const rHeaders = req.rawHeaders;
-            for(const item in rHeaders){
-                console.log(item);
-            }
-            // for(const item of req.rawHeaders){
-            //     console.log(item);
-            //     if(item.includes("created cookies:")){
-            //         cookieStr = item;
-            //     }
-            // }
-            
-            console.log("cookieStr: " + cookieStr);
-            
-            //console.log("set " + req.headers.set-cookie);
-            
-            if(cookieStr === undefined){
-                const millisecondsInAnHour = 3600000;
-                let expirationDate = new Date();
-                expirationDate.setTime(expirationDate.getTime() + millisecondsInAnHour); 
-                expirationDate = expirationDate.toUTCString();  //to pass into Expires option    
-                const initRequests = 1;        
-                res.setHeader('Set-Cookie', 
-                              [ `ChatRequests=${initRequests}; Expires=${expirationDate}; path=/; Secure; HttpOnly; SameSite=Lax`, 
-                                `ExpiryDate=${expirationDate}; Expires=${expirationDate}; path=/; Secure; HttpOnly; SameSite=Lax`]
-                             );//httponly to guard against client side cookie editing
-                //res.setHeader('Set-Cookie', `ExpiryDate=${expirationDate}; Expires=${expirationDate}; Secure; HttpOnly; SameSite=Strict`);
-                //console.log("created cookies: " + res.getHeader("Set-Cookie"));
-                return false;
-            }else if(cookieStr.includes("ChatRequests")){
-                console.log('cookieStr includes: '+ cookieStr);
-                const secondsInAHour = 3600;
-                const cookieMap = {};
-                const cookieList = cookieStr.split(';');//cookies name=value separated by semicolons
-                for(const item of cookieList){
-                    if(item.includes("Chat") || item.includes("Expiry")){
-                        item=item.trim();//incase theres a space after the semicolon
-                        item = item.split('=');
-                        cookies[item[0].trim()] = item[1];
-                    }
+               //console.log("entered function tooManyRequests");
+        let foundCookies = false;
+        let cookieStr = req.headers.cookie;
+        console.log(req.headers);
+        const rHeaders = req.headers;
+        for(const item in rHeaders){
+            console.log(item);
+        }
+        console.log("cookieStr: " + cookieStr);
+        
+        if(cookieStr === undefined){
+            const millisecondsInAnHour = 3600000;
+            let expirationDate = new Date();
+            expirationDate.setTime(expirationDate.getTime() + millisecondsInAnHour); 
+            expirationDate = expirationDate.toUTCString();  //to pass into Expires option    
+            const initRequests = 1;        
+            res.setHeader('Set-Cookie', 
+                            [ `ChatRequests=${initRequests}; Expires=${expirationDate}; path=/; Secure; HttpOnly; SameSite=Lax`, 
+                            `ExpiryDate=${expirationDate}; Expires=${expirationDate}; path=/; Secure; HttpOnly; SameSite=Lax`]
+                            );//httponly to guard against client side cookie editing
+            console.log("created cookies: " + res.getHeader("Set-Cookie"));
+            return false;
+        }else if(cookieStr.includes("ChatRequests")){
+            console.log('cookieStr includes: '+ cookieStr);
+            const secondsInAHour = 3600;
+            const cookieMap = {};
+            const cookieList = cookieStr.split(';');//cookies name=value separated by semicolons
+            for(const item of cookieList){
+                if(item.includes("Chat") || item.includes("Expiry")){
+                    item=item.trim();//incase theres a space after the semicolon
+                    item = item.split('=');
+                    cookieMap[item[0].trim()] = item[1];
                 }
-                
-                const ExpiryDate = cookies['ExpiryDate'];// UTC string
-                const ChatRequests = cookies['ChatRequests']; // string count
-                
-                const currentRequests = parseInt(ChatRequests, 10);
-                currentRequests++;
-                //cookies['ChatRequests'] = (parseInt(cookies['ChatRequests'])+1);//increment the count and reassign number
-                if(currentRequests >11){
-                    console.log("too many requests");
-                    return true;//will be limited until the cookie expires
-                }
-                res.setHeader('Set-Cookie', `ChatRequests=${currentRequests}; Expires=${ExpiryDate}; Secure; HttpOnly; SameSite=Strict`);
-                res.setHeader('Set-Cookie', `ExpiryDate=${ExpiryDate}; Expires=${ExpiryDate}; Secure; HttpOnly; SameSite=Strict`);
-                console.log("not too many; header incremneted");
-                return false;
             }
-        }catch(error){
-            console.log("error in too many: " + error.message);
-            console.error(error.stack);
-            throw error;//to be caught in create server
+            
+            const ExpiryDate = cookieMap['ExpiryDate'];// UTC string
+            const ChatRequests = cookieMap['ChatRequests']; // string count
+            
+            const currentRequests = parseInt(ChatRequests, 10);
+            currentRequests++;
+            if(currentRequests >11){
+                console.log("too many requests");
+                return true;//will be limited until the cookie expires
+            }
+            res.setHeader('Set-Cookie', `ChatRequests=${currentRequests}; Expires=${ExpiryDate}; Secure; HttpOnly; SameSite=Strict`);
+            res.setHeader('Set-Cookie', `ExpiryDate=${ExpiryDate}; Expires=${ExpiryDate}; Secure; HttpOnly; SameSite=Strict`);
+            console.log("not too many; header incremneted");
+            return false;
         }
     }
 
