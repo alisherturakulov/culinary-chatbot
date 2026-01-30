@@ -1,0 +1,111 @@
+/*
+Styles for chatbot ui
+*/
+
+/*@media(prefers-reduced-motion:reduce) {
+    html * {
+	    transition-delay: 0s !important;
+	    transition-duration: 0s !important;
+    }
+}*/
+
+body{
+    background-color:rgb(191, 203, 218);
+}
+
+.chatBotBox{
+    border:2px solid #040203;
+    background-color:rgb(249, 248, 246);
+    position:fixed;
+    bottom: -25%;
+    right: 25px;
+    height:30%;
+    width:43%;
+    transition:bottom 1s ease-in-out;
+    /*border-radius:10px;*/
+    font-size:small;
+    display:flex;
+    flex-direction: column;
+}
+
+.chatBotTab{
+    border:3px solid #f4a609;
+    /*border-radius: 10px;*/
+    margin-top: .1em;
+    margin-bottom:.1em;
+    font-size: 1em;
+    background-color:#f4a609;
+    height:7%;
+}
+
+.chatBotTab:hover{
+    background-color:#ffb049;
+
+}
+
+.chatBotMessageBox{
+    height:71%;
+    overflow-y:scroll;
+    position:relative;
+    font-size: 1em;  
+    margin: .2em;
+}
+
+p{
+    font-family:Georgia, 'Times New Roman', Times, serif;
+    border:solid 2px burlywood;
+    /* width: inherits; */
+    margin-bottom:10px;
+    overflow-wrap:break-word;
+    font-size:1em;
+}
+
+.userMessage{
+    text-align:right;
+}
+
+.chatBotInputBox{
+    position:relative;
+    text-align:center;
+    display:block;
+    padding:1px;
+    margin:0px;
+    padding:1px;
+    height:15%;
+}
+
+.chatBotInput{
+    width:77%;
+    
+}
+.chatBotButton{
+   width:20%;
+   background-color: #f4a609;
+   border:1px solid white;
+}
+
+.openChatBox{
+   /* animation-name: movechat;
+    animation-direction: alternate;
+    animation-duration: 2s;
+    animation-iteration-count: 1;
+    animation-play-state: running;
+    animation;*/
+    bottom: 10px;
+    /*transition: all 2s ease-in;*/
+    
+}
+
+
+
+/*@keyframes movechat { 
+    0%{
+        bottom: 10px;
+    }
+    100%{
+        bottom:70px
+    }
+}*/
+
+
+
