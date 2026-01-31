@@ -179,7 +179,7 @@ add_action('wp_footer', 'cac_add_chatbot_html');//to load last to avoid slowing 
 		"input" => $question,
     ]);
 	
-	$args = json_encode([
+	$args = [
 	//'method' => 'POST',//not necessary; wp_remote_request would necessitate this
 		'timeout' => 30,
 		'headers' => [
@@ -187,7 +187,7 @@ add_action('wp_footer', 'cac_add_chatbot_html');//to load last to avoid slowing 
 			'Authorization:' => 'Bearer ' . $api_key,
 		],
 		'body' => $body,
-	]);
+	];
 
     // Send the POST request to Google (Standard WP HTTP function)
     $response = wp_remote_post($url, $args);

@@ -180,7 +180,7 @@ function cac_handle_chat_request() {
         ]
     ]);
 	
-	$args = json_encode([
+	$args = [
 		//'method' => 'POST'//wp_remote_post defaults to post 
 		'headers' => [
 			'x-goog-api-key' => $api_key,//apikey passed in as header
@@ -188,7 +188,7 @@ function cac_handle_chat_request() {
 		],
 		'body' => $body,
 		'timeout' => 30,
-	]);
+	];
 
 
     // Send the POST request to Google (Standard WP HTTP function)
