@@ -62,7 +62,7 @@ function cac_handle_chat_request() {
 
 	//send json error if GEMINI_API_KEY not defined
     if (empty($api_key)) {
-        wp_send_json_error(['message' => 'API Key is not configured in wp-config.php.']);
+        wp_send_json_error(['message' => 'GEMINI_API_KEY is not configured in wp-config.php.']);
     }
 
  
@@ -181,6 +181,7 @@ function cac_handle_chat_request() {
     ]);
 	
 	$args = json_encode([
+		//'method' => 'POST'//wp_remote_post defaults to post 
 		'headers' => [
 			'x-goog-api-key' => $api_key,//apikey passed in as header
 			'Content-Type' => 'application/json'
@@ -197,12 +198,19 @@ function cac_handle_chat_request() {
     if (is_wp_error($response)) {
         wp_send_json_error(['message' => 'Connection to Gemini failed.']);
     }
+	
+	$statuscode = wp_remote_retrieve_response_code($response);
+	
+	//if response not ok
+	if($statuscode !== 200){
+		wp_send_json_error(['message' => 'Error with model reponse: '. $statuscode]);
+	}
 
     // Decode the JSON response from Google
     $data = json_decode(wp_remote_retrieve_body($response), true);
     
-    // Extract the text answer
-    $reply = $data['candidates'][0]['content']['parts'][0]['text'] ?? "I'm having trouble connecting right now.";
+    // Extract the text answer or otherwise send 
+    $reply = $data['candidates'][0]['content']['parts'][0]['text'] ?? "Sorry, I'm having trouble connecting right now.";
 
     // Send the answer back to the JavaScript frontend
     wp_send_json_success(['reply' => $reply]);

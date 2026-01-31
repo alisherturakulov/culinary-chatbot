@@ -180,11 +180,11 @@ add_action('wp_footer', 'cac_add_chatbot_html');//to load last to avoid slowing 
     ]);
 	
 	$args = json_encode([
-		'method' => 'POST',
+	//'method' => 'POST',//not necessary; wp_remote_request would necessitate this
 		'timeout' => 30,
 		'headers' => [
 			'Content-Type' => 'application/json',
-			'Authorization: Bearer ' . $api_key,
+			'Authorization:' => 'Bearer ' . $api_key,
 		],
 		'body' => $body,
 	]);
@@ -196,12 +196,18 @@ add_action('wp_footer', 'cac_add_chatbot_html');//to load last to avoid slowing 
     if (is_wp_error($response)) {
         wp_send_json_error(['message' => 'Connection to gpt failed.']);
     }
-
-    // Decode the JSON response from Google
+	
+	$statuscode = wp_remote_retrieve_response_code($response);
+	
+	if($statuscode !== 200){
+		wp_send_json_error(['message' => 'Error with model response: ' . $statuscode]);
+	}
+	
+    // Decode the JSON response from Open AI
     $data = json_decode(wp_remote_retrieve_body($response), true);
     
     // Extract the text answer
-    $reply = $data['candidates'][0]['content']['parts'][0]['text'] ?? "I'm having trouble connecting right now.";
+    $reply = $data['content']['text'] ?? "Sorry, I'm having trouble connecting right now.";
 
     // Send the answer back to the JavaScript frontend
     wp_send_json_success(['reply' => $reply]);
