@@ -49,7 +49,7 @@ add_action('wp_footer', 'cac_add_chatbot_html');//to load last to avoid slowing 
 
 
 
-// 4. The "Server" Logic (Replaces your Node.js request handler)
+// 4. The server logic to handle FormData requests from the enqueued JSfunction cac_handle_chat_request() 
 function cac_handle_chat_request() {
     // Security: Verify the request came from the wp site and not a hacker outside
     check_ajax_referer('cac_chat_nonce', 'security');
@@ -169,8 +169,8 @@ function cac_handle_chat_request() {
     ";
 
     // Prepare URL and Body for Gemini API (https://ai.google.dev/gemini-api/docs/text-generation#rest_2)
-    $url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' . $api_key;
-
+    $url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent';//api key not passed into url string directly
+	
     $body = json_encode([
         "contents" => [
             [ "parts" => [ ["text" => $question] ] ]
@@ -179,15 +179,21 @@ function cac_handle_chat_request() {
             "parts" => [ ["text" => $bot_instructions] ]
         ]
     ]);
+	
+	$args = json_encode([
+		'headers' => [
+			'x-goog-api-key' => $api_key,//apikey passed in as header
+			'Content-Type' => 'application/json'
+		],
+		'body' => $body,
+		'timeout' => 30,
+	]);
+
 
     // Send the POST request to Google (Standard WP HTTP function)
-    $response = wp_remote_post($url, [
-        'headers' => ['Content-Type' => 'application/json'],
-        'body'    => $body,
-        'timeout' => 20
-    ]);
+    $response = wp_remote_post($url, $args);
 
-    // Error Handling
+    // model Error Handling
     if (is_wp_error($response)) {
         wp_send_json_error(['message' => 'Connection to Gemini failed.']);
     }

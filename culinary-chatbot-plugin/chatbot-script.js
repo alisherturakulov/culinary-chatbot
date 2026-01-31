@@ -1,4 +1,4 @@
-// //Script for chatbot backend
+// //Script for chatbot to be enqueued in php
 
 
 document.addEventListener("DOMContentLoaded", () => {
