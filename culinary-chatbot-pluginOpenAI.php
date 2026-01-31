@@ -2,7 +2,7 @@
 /*
  * Plugin Name:       Culnary Argan Oil Chatbot
  * Plugin URI:        https://alisherturakulov.github.io/culinary-chatbot
- * Description:       Adds a chatbot to the Culinary Argan Oil website pages powered by the gemini api. Injects chatbot div into the footer. Enqueues CSS and client side JS files.
+ * Description:       Adds a chatbot to the Culinary Argan Oil website pages powered by the OpenAI API. Injects chatbot div into the footer. Enqueues CSS and client side JS files.
  * Version:           1.0
  * Author:            Alisherjon Turakulov
  */
@@ -49,8 +49,8 @@ add_action('wp_footer', 'cac_add_chatbot_html');//to load last to avoid slowing 
 
 
 
-// 4. The "Server" Logic (Replaces your Node.js request handler)
-function cac_handle_chat_request() {
+
+// 4. The server logic to handle FormData requests from the enqueued JSfunction cac_handle_chat_request() {
     // Security: Verify the request came from the wp site and not a hacker outside
     check_ajax_referer('cac_chat_nonce', 'security');
 
@@ -58,16 +58,16 @@ function cac_handle_chat_request() {
     $question = sanitize_text_field($_POST['message']);
 
     // Retrieve the API Key from the wp-config.php constant
-    $api_key = defined('GEMINI_API_KEY') ? GEMINI_API_KEY : '';
+    $api_key = defined('OPENAI_API_KEY') ? OPENAI_API_KEY : '';
 
-	//send json error if GEMINI_API_KEY not defined
+	//send json error if OPENAI_API_KEY not defined
     if (empty($api_key)) {
-        wp_send_json_error(['message' => 'API Key is not configured in wp-config.php.']);
+        wp_send_json_error(['message' => 'OPENAI_API_KEY is not configured in wp-config.php.']);
     }
 
  
     $bot_instructions = "
-                            you are a customer support chatbot for culinary argan oil, 
+                        you are a customer support chatbot for culinary argan oil, 
                         answer customer questions based on the info and FAQ given below. 
                         Dont answer questions outside the scope of whats covered in the FAQ or About Us; if these questions are still 
                         relevant answer them using your knowledge (for questions such as what are antioxidants/their benefits or the meanings of other terms), dont answer dangerous/harmful questions, or ones asking private info that can't be disclosed, for other questions you cant answer point them to the email: Hello@culinaryarganoil.com.
@@ -168,28 +168,33 @@ function cac_handle_chat_request() {
 
     ";
 
-    // Prepare URL and Body for Gemini API (https://ai.google.dev/gemini-api/docs/text-generation#rest_2)
-    $url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=' . $api_key;
-
+    // Prepare URL and Body for OPENAI API (https://api.openai.com/v1/responses)
+    $url = 'https://api.openai.com/v1/responses';//apikey passed in through header; putting it in the url can cause exposure in system logs
+	
+	$model = 'gpt-5-nano';//small and efficient model
+	
     $body = json_encode([
-        "contents" => [
-            [ "parts" => [ ["text" => $question] ] ]
-        ],
-        "system_instruction" => [
-            "parts" => [ ["text" => $bot_instructions] ]
-        ]
+        "model" => $model,
+        "instructions" => $bot_instructions,
+		"input" => $question,
     ]);
+	
+	$args = json_encode([
+		'method' => 'POST',
+		'timeout' => 30,
+		'headers' => [
+			'Content-Type' => 'application/json',
+			'Authorization: Bearer ' . $api_key,
+		],
+		'body' => $body,
+	]);
 
     // Send the POST request to Google (Standard WP HTTP function)
-    $response = wp_remote_post($url, [
-        'headers' => ['Content-Type' => 'application/json'],
-        'body'    => $body,
-        'timeout' => 20
-    ]);
+    $response = wp_remote_post($url, $args);
 
-    // Error Handling
+    // model Error Handling
     if (is_wp_error($response)) {
-        wp_send_json_error(['message' => 'Connection to Gemini failed.']);
+        wp_send_json_error(['message' => 'Connection to gpt failed.']);
     }
 
     // Decode the JSON response from Google
