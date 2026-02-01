@@ -1,5 +1,11 @@
 # Chatbot for Culinary Argan Oil Website
 
+## WP Plugin Instructions:  
+ - add culinary-chatbot-plugin folder to plugins folder of wp project
+ - add: `define( 'GEMINI_API_KEY', '<Key>');` to wp-config.php 
+ - Activate plugin from wpadmin in plugin tab
+ - If using OpenAI version, replace the culinary-chatbot-plugin.php with culinary-chatbot-pluginOpenAI.php and define OPENAI_API_KEY instead  
+
 ## Instrucitons To Test
  - For running server side js files: Nodejs 24
  	- packages: dotenv, google/genai, openai
