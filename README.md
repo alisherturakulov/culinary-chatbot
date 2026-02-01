@@ -1,12 +1,12 @@
 # Chatbot for Culinary Argan Oil Website
 
-## WP Plugin Instructions:  
- - add culinary-chatbot-plugin folder to plugins folder of wp project
+## WordPress Plugin Instructions:  
+ - use the `culinary-chatbot-plugin.zip` file to install through wp admin; or copy the plugin folder into the plugins/ directory  
  - add: `define( 'GEMINI_API_KEY', '<Key>');` to wp-config.php 
- - Activate plugin from wpadmin in plugin tab
- - If using OpenAI version, replace the culinary-chatbot-plugin.php with culinary-chatbot-pluginOpenAI.php and define OPENAI_API_KEY instead  
-
-## Instrucitons To Test
+ - Activate the plugin from the Plugins tab of wp admin
+ - To use the OpenAI version, replace `culinary-chatbot-plugin.php` with `culinary-chatbot-pluginOpenAI.php` and define `OPENAI_API_KEY` instead
+  
+## Instrucitons To Test  
  - For running server side js files: Nodejs 24
  	- packages: dotenv, google/genai, openai
  	- install by running npm install in the project directory
@@ -15,7 +15,7 @@
  	- OpenAI api key for chatbot-script.js
  	- Add then to .env file as GEMINI_API_KEY="key" or OPENAI_API_KEY="key" on newlines
  - To run server scripts: node chatbot-script.js
- - Then, go to the form page: https://alisherturakulov.github.io/culinary-chatbot/form-page.html and you can enter questions into the chat
+ - Then, go to the form page: (https://alisherturakulov.github.io/culinary-chatbot/nodejs_chatbot/form-page.html)[https://alisherturakulov.github.io/culinary-chatbot/nodejs_chatbot/form-page.html] and you can enter questions into the chat
  
 ## Features
  - Chatbot UI behaves like the accessibility tool UI
