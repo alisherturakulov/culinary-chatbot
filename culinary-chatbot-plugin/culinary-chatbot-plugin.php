@@ -1,6 +1,6 @@
 <?php
 /*
- * Plugin Name:       Culnary Argan Oil Chatbot
+ * Plugin Name:       Culinary Argan Oil Chatbot
  * Plugin URI:        https://alisherturakulov.github.io/culinary-chatbot
  * Description:       Adds a chatbot to the Culinary Argan Oil website pages powered by the gemini api. Injects chatbot div into the footer. Enqueues CSS and client side JS files.
  * Version:           1.0
@@ -49,7 +49,7 @@ add_action('wp_footer', 'cac_add_chatbot_html');//to load last to avoid slowing 
 
 
 
-// 4. The server logic to handle FormData requests from the enqueued JSfunction cac_handle_chat_request() 
+// 4. The server logic to handle FormData requests from the enqueued JS cac_handle_chat_request() 
 function cac_handle_chat_request() {
     // Security: Verify the request came from the wp site and not a hacker outside
     check_ajax_referer('cac_chat_nonce', 'security');
