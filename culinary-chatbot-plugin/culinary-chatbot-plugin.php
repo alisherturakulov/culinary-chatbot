@@ -48,12 +48,35 @@ function cac_add_chatbot_html() {
 add_action('wp_footer', 'cac_add_chatbot_html');//to load last to avoid slowing down other elements
 
 // 3. Add section and field in general settings for api key
-function cac_add_chatbot_apikey_setting(){
-    wp_add_setting_section();
+function cac_add_chatbot_apikey_setting() {
 
-    wp_add_setting_field();
+    register_setting(
+        'general',
+        'GEMINI_API_KEY'
+        );
+
+    add_settings_section(
+        'gemini_apikey_section',//id
+        'Chatbot Gemini API key',//title
+        function(){//callback to display description
+            echo '<p>Enter your Gemini API key for the chatbot here</p>';
+        },
+        'general' 
+        );
+    
+
+    add_settings_field(
+        'gemini_apikey_field',
+        'gemin_apikey_field',
+        function(){
+            echo "<input type='text'>";
+        },
+        'general',
+        'gemini_apikey_section'
+    );
 }
-wp_action('wp-admin-init', 'cac_add_chatbot_apikey_setting');
+
+wp_action('admin-init', 'cac_add_chatbot_apikey_setting');
 
 // 4. The server logic to handle FormData requests from the enqueued JS cac_handle_chat_request() 
 function cac_handle_chat_request() {
