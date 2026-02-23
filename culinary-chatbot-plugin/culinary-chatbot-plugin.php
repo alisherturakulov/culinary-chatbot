@@ -48,6 +48,8 @@ function cac_add_chatbot_html() {
 add_action('wp_footer', 'cac_add_chatbot_html');//to load last to avoid slowing down other elements
 
 // 3. Add section and field in general settings for api key
+
+
 function cac_add_chatbot_apikey_setting() {
 
     register_setting(
@@ -57,7 +59,7 @@ function cac_add_chatbot_apikey_setting() {
 
     add_settings_section(
         'gemini_apikey_section',//id
-        'Chatbot Gemini API key',//title
+        'Chatbot Gemini API Key Section',//title
         function(){//callback to display description
             echo '<p>Enter your Gemini API key for the chatbot here</p>';
         },
@@ -67,9 +69,13 @@ function cac_add_chatbot_apikey_setting() {
 
     add_settings_field(
         'gemini_apikey_field',
-        'gemin_apikey_field',
+        'Gemini API key setting',
         function(){
-            echo "<input type='text'>";
+            $setting_value = get_option('GEMINI_API_KEY');
+            if(!isset($setting_value)){//set to empty string the value isnt set
+                $setting_value = ' ';
+            }
+            echo "<input type='text' name='GEMINI_API_KEY' value='" . $setting_value ."'>";
         },
         'general',
         'gemini_apikey_section'
@@ -77,6 +83,14 @@ function cac_add_chatbot_apikey_setting() {
 }
 
 wp_action('admin-init', 'cac_add_chatbot_apikey_setting');
+
+//uninstall hook
+function chatbot_apikey_option_uninstall(){
+    $option_name = 'GEMINI_API_KEY'
+    delete_option($option_name);
+}
+
+register_uninstall_hook(__FILE__, 'chatbot_apikey_option_uninstall');
 
 // 4. The server logic to handle FormData requests from the enqueued JS cac_handle_chat_request() 
 function cac_handle_chat_request() {
@@ -89,13 +103,16 @@ function cac_handle_chat_request() {
         // (Old) Retrieve the API Key from the wp-config.php constant
         // $api_key = defined('GEMINI_API_KEY') ? GEMINI_API_KEY : '';
     //Retrieve the API key from general settings page
-    $api_key = wp_get_option('gemini_api_key');
+    $api_key = wp_get_option('GEMINI_API_KEY');
     
-
-	//send json error if GEMINI_API_KEY not defined
-    if (empty($api_key)) {
+    //send error if api key not entered
+    if($api_key === false){
         wp_send_json_error(['message' => 'GEMINI_API_KEY is not configured in wp-config.php.']);
     }
+	// //send json error if GEMINI_API_KEY not defined
+    // if (empty($api_key)) {
+    //     wp_send_json_error(['message' => 'GEMINI_API_KEY is not configured in wp-config.php.']);
+    // }
 
  
     $bot_instructions = "
