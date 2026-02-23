@@ -48,8 +48,6 @@ function cac_add_chatbot_html() {
 add_action('wp_footer', 'cac_add_chatbot_html');//to load last to avoid slowing down other elements
 
 // 3. Add section and field in general settings for api key
-
-
 function cac_add_chatbot_apikey_setting() {
 
     register_setting(
@@ -72,50 +70,28 @@ function cac_add_chatbot_apikey_setting() {
         'Gemini API key setting',
         function(){
             $setting_value = get_option('GEMINI_API_KEY');
-            if(!isset($setting_value)){//set to empty string the value isnt set
-                $setting_value = ' ';
+            if(empty($setting_value)){//set to empty string the value isnt set
+                $setting_value = '';
             }
-            echo "<input type='text' name='GEMINI_API_KEY' value='" . $setting_value ."'>";
+            echo "<input type='text' name='GEMINI_API_KEY' value='" . esc_attr($setting_value) ."'>";
         },
         'general',
         'gemini_apikey_section'
     );
 }
 
-wp_action('admin-init', 'cac_add_chatbot_apikey_setting');
+add_action('admin_init', 'cac_add_chatbot_apikey_setting');
 
 //uninstall hook
 function chatbot_apikey_option_uninstall(){
-    $option_name = 'GEMINI_API_KEY'
+    $option_name = 'GEMINI_API_KEY';
     delete_option($option_name);
 }
 
 register_uninstall_hook(__FILE__, 'chatbot_apikey_option_uninstall');
 
 // 4. The server logic to handle FormData requests from the enqueued JS cac_handle_chat_request() 
-function cac_handle_chat_request() {
-    // Security: Verify the request came from the wp site and not a hacker outside
-    check_ajax_referer('cac_chat_nonce', 'security');
-
-    // Get the user's message from the POST request and clean it
-    $question = sanitize_text_field($_POST['message']);
-
-        // (Old) Retrieve the API Key from the wp-config.php constant
-        // $api_key = defined('GEMINI_API_KEY') ? GEMINI_API_KEY : '';
-    //Retrieve the API key from general settings page
-    $api_key = wp_get_option('GEMINI_API_KEY');
-    
-    //send error if api key not entered
-    if($api_key === false){
-        wp_send_json_error(['message' => 'GEMINI_API_KEY is not configured in wp-config.php.']);
-    }
-	// //send json error if GEMINI_API_KEY not defined
-    // if (empty($api_key)) {
-    //     wp_send_json_error(['message' => 'GEMINI_API_KEY is not configured in wp-config.php.']);
-    // }
-
- 
-    $bot_instructions = "
+ $bot_instructions = "
                             you are a customer support chatbot for culinary argan oil, 
                         answer customer questions based on the info and FAQ given below. 
                         Dont answer questions outside the scope of whats covered in the FAQ or About Us; if these questions are still 
@@ -215,7 +191,27 @@ function cac_handle_chat_request() {
                         What does 'pharmaceutical grade' mean?
                         For Argan oil: a creative marketing term, so just nonsense really. There are 4 grades of Argan oil; Extra Virgin Argan Oil: EVAO(ours) is the best quality. Tested by lab, regulated by government.
 
-    ";
+                    ";
+function cac_handle_chat_request() {
+    // Security: Verify the request came from the wp site and not a hacker outside
+    check_ajax_referer('cac_chat_nonce', 'security');
+
+    // Get the user's message from the POST request and clean it
+    $question = sanitize_text_field($_POST['message']);
+
+        // (Old) Retrieve the API Key from the wp-config.php constant
+        // $api_key = defined('GEMINI_API_KEY') ? GEMINI_API_KEY : '';
+    //Retrieve the API key from general settings page
+    $api_key = get_option('GEMINI_API_KEY');
+    
+    //send error if api key not entered
+    if($api_key === false || empty($api_key)){
+        wp_send_json_error(['message' => 'GEMINI_API_KEY is not configured in general settings.']);
+    }
+	// //send json error if GEMINI_API_KEY not defined
+    // if (empty($api_key)) {
+    //     wp_send_json_error(['message' => 'GEMINI_API_KEY is not configured in wp-config.php.']);
+    // }
 
     // Prepare URL and Body for Gemini API (https://ai.google.dev/gemini-api/docs/text-generation#rest_2)
     $url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent';//api key not passed into url string directly
@@ -252,7 +248,7 @@ function cac_handle_chat_request() {
 	
 	//if response not ok
 	if($statuscode !== 200){
-		wp_send_json_error(['message' => 'Error with model reponse: '. $statuscode]);
+		wp_send_json_error(['message' => 'Error with model response: '. $statuscode]);
 	}
 
     // Decode the JSON response from Google
