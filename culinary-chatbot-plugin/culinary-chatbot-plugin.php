@@ -47,7 +47,13 @@ function cac_add_chatbot_html() {
 // Hook this into footer so it appears on every page, 
 add_action('wp_footer', 'cac_add_chatbot_html');//to load last to avoid slowing down other elements
 
+// 3. Add section and field in general settings for api key
+function cac_add_chatbot_apikey_setting(){
+    wp_add_setting_section();
 
+    wp_add_setting_field();
+}
+wp_action('wp-admin-init', 'cac_add_chatbot_apikey_setting');
 
 // 4. The server logic to handle FormData requests from the enqueued JS cac_handle_chat_request() 
 function cac_handle_chat_request() {
@@ -57,8 +63,11 @@ function cac_handle_chat_request() {
     // Get the user's message from the POST request and clean it
     $question = sanitize_text_field($_POST['message']);
 
-    // Retrieve the API Key from the wp-config.php constant
-    $api_key = defined('GEMINI_API_KEY') ? GEMINI_API_KEY : '';
+        // (Old) Retrieve the API Key from the wp-config.php constant
+        // $api_key = defined('GEMINI_API_KEY') ? GEMINI_API_KEY : '';
+    //Retrieve the API key from general settings page
+    $api_key = wp_get_option('gemini_api_key');
+    
 
 	//send json error if GEMINI_API_KEY not defined
     if (empty($api_key)) {
