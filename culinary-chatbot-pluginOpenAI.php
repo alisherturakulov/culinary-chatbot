@@ -47,28 +47,52 @@ function cac_add_chatbot_html() {
 // Hook this into footer so it appears on every page, 
 add_action('wp_footer', 'cac_add_chatbot_html');//to load last to avoid slowing down other elements
 
+// 3. Add section and field in general settings for api key
+function cac_add_chatbot_apikey_setting() {
 
+    register_setting(
+        'general',
+        'OPENAI_API_KEY'
+        );
 
+    add_settings_section(
+        'openai_apikey_section',//id
+        'Chatbot OpenAI API Key Section',//title
+        function(){//callback to display description
+            echo '<p>Enter your OpenAI API key for the chatbot here</p>';
+        },
+        'general' 
+        );
+    
 
-// 4. The server logic to handle FormData requests from the enqueued JS 
-function cac_handle_chat_request() {
-    // Security: Verify the request came from the wp site and not a hacker outside
-    check_ajax_referer('cac_chat_nonce', 'security');
+    add_settings_field(
+        'openai_apikey_field',
+        'OpenAI API key setting',
+        function(){
+            $setting_value = get_option('OPENAI_API_KEY');
+            if(empty($setting_value)){//set to empty string the value isnt set
+                $setting_value = '';
+            }
+            echo "<input type='text' name='OPENAI_API_KEY' value='" . esc_attr($setting_value) ."'>";
+        },
+        'general',
+        'openai_apikey_section'
+    );
+}
 
-    // Get the user's message from the POST request and clean it
-    $question = sanitize_text_field($_POST['message']);
+add_action('admin_init', 'cac_add_chatbot_apikey_setting');
 
-    // Retrieve the API Key from the wp-config.php constant
-    $api_key = defined('OPENAI_API_KEY') ? OPENAI_API_KEY : '';
+//uninstall hook
+function chatbot_apikey_option_uninstall(){
+    $option_name = 'OPENAI_API_KEY';
+    delete_option($option_name);
+}
 
-	//send json error if OPENAI_API_KEY not defined
-    if (empty($api_key)) {
-        wp_send_json_error(['message' => 'OPENAI_API_KEY is not configured in wp-config.php.']);
-    }
+register_uninstall_hook(__FILE__, 'chatbot_apikey_option_uninstall');
 
- 
-    $bot_instructions = "
-                        you are a customer support chatbot for culinary argan oil, 
+// 4. The server logic to handle FormData requests from the enqueued JS cac_handle_chat_request() 
+ $bot_instructions = "
+                            you are a customer support chatbot for culinary argan oil, 
                         answer customer questions based on the info and FAQ given below. 
                         Dont answer questions outside the scope of whats covered in the FAQ or About Us; if these questions are still 
                         relevant answer them using your knowledge (for questions such as what are antioxidants/their benefits or the meanings of other terms), dont answer dangerous/harmful questions, or ones asking private info that can't be disclosed, for other questions you cant answer point them to the email: Hello@culinaryarganoil.com.
@@ -167,7 +191,31 @@ function cac_handle_chat_request() {
                         What does 'pharmaceutical grade' mean?
                         For Argan oil: a creative marketing term, so just nonsense really. There are 4 grades of Argan oil; Extra Virgin Argan Oil: EVAO(ours) is the best quality. Tested by lab, regulated by government.
 
-    ";
+                    ";
+
+
+function cac_handle_chat_request() {
+    // Security: Verify the request came from the wp site and not a hacker outside
+    check_ajax_referer('cac_chat_nonce', 'security');
+
+    // Get the user's message from the POST request and clean it
+    $question = sanitize_text_field($_POST['message']);
+
+    // Retrieve the API Key from the wp-config.php constant
+    //$api_key = defined('') ? OPENAI_API_KEY : '';
+
+	//send json error if OPENAI_API_KEY not defined
+    // if (empty($api_key)) {
+    //     wp_send_json_error(['message' => 'OPENAI_API_KEY is not configured in wp-config.php.']);
+    // }
+
+    //Retrieve the API key from general settings page
+    $api_key = get_option('OPENAI_API_KEY');
+    
+    //send error if api key not entered
+    if($api_key === false || empty($api_key)){
+        wp_send_json_error(['message' => 'OPENAI_API_KEY is not configured in general settings.']);
+    }
 
     // Prepare URL and Body for OPENAI API (https://api.openai.com/v1/responses)
     $url = 'https://api.openai.com/v1/responses';//apikey passed in through header; putting it in the url can cause exposure in system logs
