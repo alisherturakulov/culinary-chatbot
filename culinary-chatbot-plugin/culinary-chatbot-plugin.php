@@ -216,6 +216,8 @@ function cac_handle_chat_request() {
     // Prepare URL and Body for Gemini API (https://ai.google.dev/gemini-api/docs/text-generation#rest_2)
     $url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent';//api key not passed into url string directly
 	
+    global $bot_instructions;
+
     $body = json_encode([
         "contents" => [
             [ "parts" => [ ["text" => $question] ] ]

@@ -222,6 +222,8 @@ function cac_handle_chat_request() {
 	
 	$model = 'gpt-5-nano';//small and efficient model
 	
+    global $bot_instructions;
+
     $body = json_encode([
         "model" => $model,
         "instructions" => $bot_instructions,
